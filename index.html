@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Els meus jocs</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 3rem 1.5rem;
+      color: #f8fafc;
+      background: #101827;
+      font-family: system-ui, sans-serif;
+    }
+
+    main { max-width: 900px; margin: auto; }
+    header { margin-bottom: 2rem; }
+    h1 { margin-bottom: .5rem; font-size: clamp(2rem, 6vw, 3.5rem); }
+    header p { color: #aab6c8; }
+
+    #cerca {
+      width: 100%;
+      margin-bottom: 1.5rem;
+      padding: .85rem 1rem;
+      border: 1px solid #344256;
+      border-radius: 12px;
+      color: inherit;
+      background: #1b2638;
+      font: inherit;
+    }
+
+    .jocs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .joc {
+      display: block;
+      padding: 1.25rem;
+      border: 1px solid #344256;
+      border-radius: 16px;
+      color: inherit;
+      background: #1b2638;
+      text-decoration: none;
+      transition: transform .2s, border-color .2s;
+    }
+
+    .joc:hover, .joc:focus-visible {
+      transform: translateY(-3px);
+      border-color: #8b5cf6;
+    }
+
+    .joc h2 { margin: 0 0 .5rem; font-size: 1.2rem; }
+    .joc p { margin: 0; color: #aab6c8; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>🎮 Els meus jocs</h1>
+      <p>Tria un joc per començar.</p>
+    </header>
+
+    <label for="cerca">Cerca un joc</label>
+    <input id="cerca" type="search" placeholder="Escriu el nom d’un joc…">
+
+    <section class="jocs" id="llista-jocs" aria-label="Llista de jocs">
+      <!-- Canvia el nom i l'enllaç de cada joc per les rutes reals del projecte. -->
+      <a class="joc" href="./joc-1/index.html">
+        <h2>Joc 1</h2>
+        <p>Obre el primer joc.</p>
+      </a>
+
+      <a class="joc" href="./joc-2/index.html">
+        <h2>Joc 2</h2>
+        <p>Obre el segon joc.</p>
+      </a>
+    </section>
+  </main>
+
+  <script>
+    const cerca = document.querySelector("#cerca");
+    const jocs = document.querySelectorAll(".joc");
+
+    cerca.addEventListener("input", () => {
+      const consulta = cerca.value.toLocaleLowerCase("ca");
+      jocs.forEach((joc) => {
+        joc.hidden = !joc.textContent.toLocaleLowerCase("ca").includes(consulta);
+      });
+    });
+  </script>
+</body>
+</html>
