@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>3 en raya</title>
+	<style>
+		:root {
+			color-scheme: dark;
+			font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+			background: #10131d;
+			color: #f5f6fb;
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			min-height: 100vh;
+			margin: 0;
+			display: grid;
+			place-items: center;
+			padding: 24px;
+			background: radial-gradient(ellipse at top, #252b45, #10131d 65%);
+		}
+
+		main {
+			width: min(100%, 430px);
+			text-align: center;
+		}
+
+		h1 { margin: 0 0 8px; font-size: clamp(2rem, 8vw, 3rem); }
+		.subtitle { margin: 0 0 28px; color: #aab1c8; }
+
+		.scoreboard {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 12px;
+			margin-bottom: 20px;
+		}
+
+		.score {
+			padding: 12px;
+			border: 1px solid #343b54;
+			border-radius: 14px;
+			background: #1b2030;
+			color: #c4c9d8;
+		}
+
+		.score strong { display: block; margin-top: 3px; font-size: 1.4rem; color: #fff; }
+		#status { min-height: 28px; margin: 0 0 14px; font-weight: 650; }
+		.x { color: #72d6ff; }
+		.o { color: #ff9db7; }
+
+		.board {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 10px;
+			margin-bottom: 22px;
+		}
+
+		.cell {
+			aspect-ratio: 1;
+			border: 1px solid #343b54;
+			border-radius: 18px;
+			background: #1b2030;
+			color: #fff;
+			font: inherit;
+			font-size: clamp(3rem, 17vw, 5rem);
+			font-weight: 750;
+			cursor: pointer;
+			transition: background .15s, transform .15s, border-color .15s;
+		}
+
+		.cell:hover:enabled { transform: translateY(-2px); background: #252c40; border-color: #697493; }
+		.cell:focus-visible, .control:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+		.cell:disabled { cursor: default; }
+		.cell.winner { background: #293650; border-color: #8ce2bc; }
+
+		.control {
+			border: 0;
+			border-radius: 999px;
+			padding: 12px 22px;
+			background: #7c83ff;
+			color: #fff;
+			font: inherit;
+			font-weight: 700;
+			cursor: pointer;
+		}
+
+		.control:hover { background: #9298ff; }
+	</style>
+</head>
+<body>
+	<main>
+		<h1>3 en raya</h1>
+		<p class="subtitle">Una partida rápida para dos jugadores</p>
+
+		<section class="scoreboard" aria-label="Marcador">
+			<div class="score">Jugador <span class="x">X</span><strong id="scoreX">0</strong></div>
+			<div class="score">Jugador <span class="o">O</span><strong id="scoreO">0</strong></div>
+		</section>
+
+		<p id="status" aria-live="polite">Turno de <span class="x">X</span></p>
+		<section class="board" aria-label="Tablero de 3 en raya">
+			<button class="cell" aria-label="Casilla 1" data-index="0"></button>
+			<button class="cell" aria-label="Casilla 2" data-index="1"></button>
+			<button class="cell" aria-label="Casilla 3" data-index="2"></button>
+			<button class="cell" aria-label="Casilla 4" data-index="3"></button>
+			<button class="cell" aria-label="Casilla 5" data-index="4"></button>
+			<button class="cell" aria-label="Casilla 6" data-index="5"></button>
+			<button class="cell" aria-label="Casilla 7" data-index="6"></button>
+			<button class="cell" aria-label="Casilla 8" data-index="7"></button>
+			<button class="cell" aria-label="Casilla 9" data-index="8"></button>
+		</section>
+		<button class="control" id="restart">Nueva partida</button>
+	</main>
+
+	<script>
+		const cells = [...document.querySelectorAll('.cell')];
+		const status = document.getElementById('status');
+		const restart = document.getElementById('restart');
+		const scores = { X: 0, O: 0 };
+		const lines = [
+			[0, 1, 2], [3, 4, 5], [6, 7, 8],
+			[0, 3, 6], [1, 4, 7], [2, 5, 8],
+			[0, 4, 8], [2, 4, 6]
+		];
+		let board = Array(9).fill('');
+		let turn = 'X';
+		let gameOver = false;
+
+		function showTurn() {
+			status.innerHTML = `Turno de <span class="${turn.toLowerCase()}">${turn}</span>`;
+		}
+
+		function play(event) {
+			const cell = event.currentTarget;
+			const index = Number(cell.dataset.index);
+			if (gameOver || board[index]) return;
+
+			board[index] = turn;
+			cell.textContent = turn;
+			cell.classList.add(turn.toLowerCase());
+			cell.setAttribute('aria-label', `Casilla ${index + 1}: ${turn}`);
+			cell.disabled = true;
+
+			const winningLine = lines.find(line => line.every(i => board[i] === turn));
+			if (winningLine) {
+				gameOver = true;
+				winningLine.forEach(i => cells[i].classList.add('winner'));
+				scores[turn]++;
+				document.getElementById(`score${turn}`).textContent = scores[turn];
+				status.innerHTML = `¡Gana el jugador <span class="${turn.toLowerCase()}">${turn}</span>!`;
+				cells.forEach(button => button.disabled = true);
+			} else if (board.every(Boolean)) {
+				gameOver = true;
+				status.textContent = '¡Empate!';
+			} else {
+				turn = turn === 'X' ? 'O' : 'X';
+				showTurn();
+			}
+		}
+
+		function newGame() {
+			board = Array(9).fill('');
+			turn = 'X';
+			gameOver = false;
+			cells.forEach((cell, index) => {
+				cell.textContent = '';
+				cell.disabled = false;
+				cell.className = 'cell';
+				cell.setAttribute('aria-label', `Casilla ${index + 1}`);
+			});
+			showTurn();
+		}
+
+		cells.forEach(cell => cell.addEventListener('click', play));
+		restart.addEventListener('click', newGame);
+	</script>
+</body>
+</html>

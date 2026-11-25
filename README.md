@@ -1,3 +1,3 @@
 # SMX2627AO
-Holaaaaaaaaaaaaaaa!
+Hola!
 Aquest és un projecte de GitHub
